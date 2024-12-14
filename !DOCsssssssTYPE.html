@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Tap Challenge</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #eef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .object {
+            position: absolute;
+            background-color: #333;
+            border-radius: 50%;
+        }
+
+        .carbon {
+            width: 50px;
+            height: 50px;
+            background-color: #000;
+        }
+
+        .trap {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+        }
+
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #score, #timer {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #222;
+            margin: 10px;
+        }
+
+        #score {
+            top: 0;
+            left: 0;
+        }
+
+        #timer {
+            top: 0;
+            right: 0;
+        }
+
+        #startButton {
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #startButton:hover {
+            background-color: #45a049;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="gameCanvas">
+        <div id="score">Score: 0</div>
+        <div id="timer">Time: 30</div>
+        <div class="center">
+            <button id="startButton">Start Game</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const scoreDisplay = document.getElementById("score");
+        const timerDisplay = document.getElementById("timer");
+        const startButton = document.getElementById("startButton");
+
+        let score = 0;
+        let timer = 30;
+        let gameInterval;
+        let round = 1;
+
+        function startGame() {
+            startButton.style.display = "none";
+            score = 0;
+            timer = round === 1 ? 30 : 15;
+            scoreDisplay.textContent = `Score: ${score}`;
+            timerDisplay.textContent = `Time: ${timer}`;
+            gameInterval = setInterval(updateTimer, 1000);
+
+            if (round === 1) {
+                generateCarbon();
+            }
+        }
+
+        function updateTimer() {
+            timer--;
+            timerDisplay.textContent = `Time: ${timer}`;
+            if (timer <= 0) {
+                clearInterval(gameInterval);
+                endRound();
+            }
+        }
+
+        function generateCarbon() {
+            for (let i = 0; i < 5; i++) {
+                const carbon = document.createElement("div");
+                carbon.classList.add("object", "carbon");
+                randomizePosition(carbon);
+
+                carbon.addEventListener("click", () => {
+                    score += 10;
+                    scoreDisplay.textContent = `Score: ${score}`;
+                    canvas.removeChild(carbon);
+                });
+
+                canvas.appendChild(carbon);
+
+                setTimeout(() => {
+                    if (carbon.parentNode) {
+                        canvas.removeChild(carbon);
+                    }
+                }, 3000);
+            }
+        }
+
+        function randomizePosition(element) {
+            const x = Math.random() * (canvas.offsetWidth - 50);
+            const y = Math.random() * (canvas.offsetHeight - 50);
+            element.style.left = `${x}px`;
+            element.style.top = `${y}px`;
+        }
+
+        function endRound() {
+            clearInterval(gameInterval);
+            const objects = document.querySelectorAll(".object");
+            objects.forEach(obj => obj.remove());
+
+            if (round === 1) {
+                alert(`Round 1 Complete! Score: ${score}`);
+                round = 2;
+                startGame();
+            } else {
+                alert(`Game Over! Final Score: ${score}`);
+                round = 1;
+                startButton.style.display = "block";
+            }
+        }
+
+        startButton.addEventListener("click", startGame);
+    </script>
+</body>
+</html>
